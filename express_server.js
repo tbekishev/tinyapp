@@ -6,6 +6,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+function generateRandomString() {
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let str = '';
+  for (let i = 0; i < 6; i++) {
+    str += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return str;
+}
+
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
@@ -46,8 +55,15 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const newShort = generateRandomString();
+  urlDatabase[newShort] = req.body.longURL;
+  res.redirect(`/urls/${newShort}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const longURL = templateVars.longURL;
+  res.redirect(longURL);
 });
 
 app.listen(PORT, () => {
