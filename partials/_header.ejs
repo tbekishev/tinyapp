@@ -24,8 +24,14 @@
         <button type = "submit" class = "btn btn-outline-dark">Logout</button>
       </p>
      </form>
-   <% } %>
-    
+    <% } else{ %>  
+      <form method = "GET" action = '/login'>
+        <a href = "/login" class="nav-item nav-link">Login</a>
+      </form>
+      <form method = "GET" action = '/register'>
+        <a href = "/register" class="nav-item nav-link">Register</a>
+      </form>
+      <% } %>
     
   </nav>
 </header>
