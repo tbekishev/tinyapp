@@ -31,23 +31,21 @@ function generateRandomString() {
   return str;
 }
 
-function getUserByEmail(email) {
+function getUserByEmail(email1) {
   for (let key in users) {
-    if (users[key].email === email) {
+    if (users[key].email === email1) {
       return users[key];
     } 
+  }
   return null;
-}
 }
 
 app.use(cookieParser());
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => { 
-
-  //res.send("Hello!");
-  res.send(req.cookies.username);
+app.get("/", (req, res) => {
+  res.redirect('/urls');
 }); 
 
 app.get("/urls.json", (req, res) => {
@@ -98,14 +96,19 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect("/urls");
+  const user = getUserByEmail(req.body.email);
+  if (user !== null && user.password === req.body.password) {
+    res.cookie('user_id', user.id);
+    res.redirect("/urls");
+  } else {
+    res.status(403).send('Login is incorrect or no such an email registered')
+  }
 })
 
 app.post("/logout", (req, res) => {
+  const templateVars = {user: null};
   res.clearCookie('user_id');
-  res.redirect("/urls");
+  res.render("urls_login", templateVars);
 })
 
 app.get("/register", (req, res) => {
