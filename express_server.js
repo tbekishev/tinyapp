@@ -31,6 +31,15 @@ function generateRandomString() {
   return str;
 }
 
+function getUserByEmail(email) {
+  for (let key in users) {
+    if (users[key].email === email) {
+      return users[key];
+    } 
+  return null;
+}
+}
+
 app.use(cookieParser());
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -105,6 +114,12 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  if (req.body.email === '' || req.body.password === '') {
+    res.status(400).send('email or password is empty')
+  }
+  if (getUserByEmail(req.body.email) !== null) {
+      res.status(400).send('this email is already registered');
+    }
   const newUserId = generateRandomString();
   users[newUserId] = {};
   users[newUserId].id = newUserId;
