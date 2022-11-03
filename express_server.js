@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 const PORT = 8080; // default port 8080
 /*const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -84,6 +85,7 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = { user: users[req.cookies.user_id], cookie: req.cookies.user_id, urls: urlsForUser(req.cookies.user_id)};
+  console.log(templateVars)
   res.render("urls_index", templateVars);
 });
 
@@ -161,11 +163,12 @@ app.post("/urls/:id", (req, res) => {
 
 app.post("/login", (req, res) => {
   const user = getUserByEmail(req.body.email);
-  if (user !== null && user.password === req.body.password) {
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+  if (user !== null &&  bcrypt.compareSync(req.body.password, hashedPassword)) {
     res.cookie('user_id', user.id);
     res.redirect("/urls");
   } else {
-    res.status(403).send('Login is incorrect or no such an email registered');
+    res.status(403).send('Login is incorrect or email is not registered');
   }
 });
 
@@ -191,10 +194,12 @@ app.post("/register", (req, res) => {
     res.status(400).send('this email is already registered');
   }
   const newUserId = generateRandomString();
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+  console.log(hashedPassword)
   users[newUserId] = {};
   users[newUserId].id = newUserId;
   users[newUserId].email = req.body.email;
-  users[newUserId].password = req.body.password;
+  users[newUserId].password = hashedPassword;
   res.cookie('user_id', newUserId);
   res.redirect("/urls");
 });
